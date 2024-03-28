@@ -1,0 +1,34 @@
+# print('Actual drug level = ' + str(D))
+
+
+            # Már tudjuk mennyivel kell növelni az modellidőt (min_tau-val), hát növeljük is!
+            # Úgy tesszük, hogy ha meghalad egy előre kiválasztott discrete_time steppet, akkor D-t updateljük.
+            # if t < discrete_time:
+            #    t += min_tau
+            # else:
+            #    discrete_time += time_step
+            #    if discrete_time % treatment_freq == 0:
+            #        D = drug_0
+            #    else:
+            #        D = drug_0 * np.exp(-drug_decay * (t % treatment_freq))
+            #    t += min_tau
+            # print('Actual drug level = ' + str(D))
+
+"""
+plt.plot(t, r, c="red", linewidth=1.5, label='Nr. of cells in R')
+plt.plot(t, y, c="orange", linewidth=1.5, label='Nr. of cells in Y')
+plt.plot(t, g, c="green", linewidth=1.5, label='Nr. of cells in G')
+# A második tengelyt a grafikon jobboldalára rajzolom
+ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-ax1
+ax2.set_ylabel('Ez a másik ...', color="red")
+ax2.plot(t, f3, "--", color="lightcoral")
+ax2.plot(t, f3/2, ":", color="lightcoral")
+ax2.tick_params(axis='y', labelcolor="red"
+# plt.plot(t, m, c="brown", linewidth=1.5)
+plt.plot(t, r + y + g + m, c="black", linewidth=1.5, label='Total nr. of cells')
+# plt.legend(loc='lower right')
+
+plt.title("$r^{-1}= $" + str(Tau) + ' k=' + str(k_r) + ', cc_r, cc_y, cc_g=' + str(cc_r) + ' ' + str(cc_y) + ' ' + str(cc_g))
+
+# plt.savefig(str(Tau)+','+str(Theta)+'.png', dpi = 300)
+"""
