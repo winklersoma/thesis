@@ -18,7 +18,7 @@ def exp_stoch(D0, r, time_step):
 
     statistic = [D]
     time_stat = [0]
-    while time_stat[-1] < 1 + time_step:  # D > 0:
+    while time_stat[-1] < 10 + time_step:  # D > 0:
         a = r * D
         Tau = np.random.exponential(scale=(1 / a))
         D -= 1
@@ -33,4 +33,3 @@ def exp_stoch(D0, r, time_step):
                 statistic.append(D)
 
     return [time, state, time_stat, statistic]
-
