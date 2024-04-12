@@ -1,10 +1,10 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 
-def logdelay(params):
-    treatment_freq, drug_0 = params
-    r_p = 1/0.05
+def logdelay(treatment_freq=10, drug_0=1, k_c=(0.25, 0, 0), delta=0.8):
+    treatment_freq = treatment_freq
+    drug_0 = drug_0
+    r_p = 1 / 0.05
     k_r = 10
     k_y = 10
     k_g = 10
@@ -12,18 +12,18 @@ def logdelay(params):
     cc_y = 0.387
     cc_g = 1.285
     drug_decay = np.log(2) / 2  # derived from Doxorubicin half-life
-    delta = 0.8  # drug mortality rate from Song 2022
-    K_c_r = 0.25  # Let us try this as selectivity
-    K_c_y = 0
-    K_c_g = 0
+    delta = delta  # drug mortality rate from Song 2022
+    K_c_r = k_c[0]  # Let us try this as selectivity
+    K_c_y = k_c[1]  # There is no death event in group Y
+    K_c_g = k_c[2]  # There is no death event in group G
     m0 = 0
     r0 = 106
     y0 = 209
     g0 = 76
-    repeat = 20
+    repeat = 10
     r_length, y_length, g_length = 10.28, 3.87, 12.85  # átlagos sejtciklus hossz becsülve a vitadello cikkben.
     K = 20000  # meg kellett emelni, mert elérte. (K - 2 * M * (len(R) + len(Y) + len(G))) < 0!!
-    end_time = 47.75
+    end_time = 84
     time_step = 0.25
     drug_step = 0.2
     Data = []
@@ -41,7 +41,7 @@ def logdelay(params):
         t_drug = [0]
         R_stat, Y_stat, G_stat, M_stat, D_stat = [len(R)], [len(Y)], [len(G)], [M], [drug_0]
 
-        while t < end_time and np.any([0 < len(R), 0 < len(Y), 0 < len(G), (M + 2 * (len(R) + len(Y) + len(G))) < K]):
+        while t < end_time and np.any([0 < len(R), 0 < len(Y), 0 < len(G)]) and ((M + 2 * (len(R) + len(Y) + len(G))) < K):
 
             # Gillespie
             a_r = r_p * M * (K - (M + 2 * (len(R) + len(Y) + len(G)))) / K
@@ -108,7 +108,8 @@ def logdelay(params):
                 Y -= min_tau
                 G -= min_tau
 
-            elif np.min(np.array([theta1, theta2, theta3])) == theta3:  # Ha a legrövidebb idő G-beli sejthez tartozik
+            # elif np.min(np.array([theta1, theta2, theta3])) == theta3:  # Ha a legrövidebb idő G-beli sejthez tartozik
+            else:
                 min_tau = theta3
                 G = np.delete(G, np.argmin(G))
                 M += 2
@@ -120,7 +121,7 @@ def logdelay(params):
             drug_disc_step = int((t - t_drug[-1]) / drug_step)
 
             if drug_disc_step >= 0:
-                for i in range(drug_disc_step):
+                for j in range(drug_disc_step):
                     t_drug.append(t_drug[-1] + drug_step)
                     if t_drug[-1] % treatment_freq == 0:
                         D += drug_0
@@ -149,7 +150,8 @@ def logdelay(params):
         if len(d[0]) < m:
             m = len(d[0])
 
-    avg_t, avg_R, avg_Y, avg_G, avg_M, avg_D = np.zeros(m), np.zeros(m), np.zeros(m), np.zeros(m), np.zeros(m), np.zeros(m)
+    avg_t, avg_R, avg_Y, avg_G, avg_M, avg_D = (
+        np.zeros(m), np.zeros(m), np.zeros(m), np.zeros(m), np.zeros(m), np.zeros(m))
 
     for d in Data:
         avg_t += np.array(d[0])[:m] / size
@@ -159,37 +161,3 @@ def logdelay(params):
         avg_M += np.array(d[4])[:m] / size
         avg_D += np.array(d[5])[:m] / size
     return [avg_t, avg_R, avg_Y, avg_G, avg_M, avg_D]
-
-"""
-# A szaporodási ráta inverze, a pihenő fázisban töltött idő várható értéke
-Tau = .05
-# A gamma eloszlások paraméterei becsülve a vitadello cikkből
-# R kompartmentnél 10 alfázis esetén 10.28-as becsült fázishossz mellett k_r=10, cc_r=1.028:
-k_r = 10
-cc_r = 1.028
-# Y kompartmentnél 10 alfázis esetén 3.87-es becsült fázishossz mellett k_y=10, cc_y=0.387:
-k_y = 10
-cc_y = 0.387
-# G kompartmentnél 10 alfázis esetén 12.85-ös becsült fázishossz mellett k_g=10, cc_g=1.285:
-k_g = 10
-cc_g = 1.285
-t, r, y, g, m, d = logdelay([1 / Tau, k_r, cc_r, k_y, cc_y, k_g, cc_g])
-
-fig, ax1 = plt.subplots(figsize=(8, 6))
-
-ax1.set_ylabel('Nr. of cells', color="black")
-ax1.plot(t, r, c="red", linewidth=1.5, label='Nr. of cells in R')
-ax1.plot(t, y, c="orange", linewidth=1.5, label='Nr. of cells in Y')
-ax1.plot(t, g, c="green", linewidth=1.5, label='Nr. of cells in G')
-ax1.tick_params(axis='y', labelcolor="black")
-ax1.set_xlabel('Time')
-
-ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-ax1
-ax2.set_ylabel('Drug level', color="blue")
-ax2.step(t, d, "blue", where='post', alpha=0.4)
-ax2.tick_params(axis='y', labelcolor="blue")
-
-
-fig.tight_layout()  # otherwise the right y-label is slightly clipped
-plt.show()
-"""
