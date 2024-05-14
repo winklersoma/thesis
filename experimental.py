@@ -98,7 +98,7 @@ def logdelay(drug_0=5.2632, k_c=(0.9, 0, 0), delta=1.8328):
             ######################## Statistics ################################
 
             disc_step = int((t - t_stat[-1]) / time_step)
-# csak hogy látszodjon miről van szó: treatments = [0, 24, 48, 72, 96, 168, 192, 216, 240, 264]
+            treatments = [0, 24, 48, 72, 96, 168, 192, 216, 240, 264]
             if disc_step >= 0:
                 for j in range(disc_step):
                     if len(treatments) > treatment_counter:

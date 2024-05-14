@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def logdelay(treatment_freq=10, drug_0=1, k_c=(0.25, 0, 0), delta=0.8):
+def logdelay(treatment_freq=24, drug_0=150, k_c=(0.9, 0, 0), delta=1.8328):
     treatment_freq = treatment_freq
     drug_0 = drug_0
     r_p = 1 / 0.05
@@ -11,19 +11,19 @@ def logdelay(treatment_freq=10, drug_0=1, k_c=(0.25, 0, 0), delta=0.8):
     cc_r = 1.028
     cc_y = 0.387
     cc_g = 1.285
-    drug_decay = np.log(2) / 2  # derived from Doxorubicin half-life
+    drug_decay = 0.5199  # derived from DePillis
     delta = delta  # drug mortality rate from Song 2022
     K_c_r = k_c[0]  # Let us try this as selectivity
     K_c_y = k_c[1]  # There is no death event in group Y
     K_c_g = k_c[2]  # There is no death event in group G
-    m0 = 0
-    r0 = 106
-    y0 = 209
-    g0 = 76
+    m0 = 500  # Ennek is kell adni értéket, mert benne van az a0 képletében
+    r0 = 500
+    y0 = 500
+    g0 = 500
     repeat = 10
     r_length, y_length, g_length = 10.28, 3.87, 12.85  # átlagos sejtciklus hossz becsülve a vitadello cikkben.
-    K = 20000  # meg kellett emelni, mert elérte. (K - 2 * M * (len(R) + len(Y) + len(G))) < 0!!
-    end_time = 84
+    K = 10000  # meg kellett emelni, mert elérte. (K - 2 * M * (len(R) + len(Y) + len(G))) < 0!!
+    end_time = 336
     time_step = 0.25
     drug_step = 0.2
     Data = []
@@ -41,17 +41,17 @@ def logdelay(treatment_freq=10, drug_0=1, k_c=(0.25, 0, 0), delta=0.8):
         t_drug = [0]
         R_stat, Y_stat, G_stat, M_stat, D_stat = [len(R)], [len(Y)], [len(G)], [M], [drug_0]
 
-        while t < end_time and np.any([0 < len(R), 0 < len(Y), 0 < len(G)]) and ((M + 2 * (len(R) + len(Y) + len(G))) < K):
+        while t < end_time and np.any([0 < len(R), 0 < len(Y), 0 < len(G)])\
+                and ((M + 2 * (len(R) + len(Y) + len(G))) < K):
 
             # Gillespie
             a_r = r_p * M * (K - (M + 2 * (len(R) + len(Y) + len(G)))) / K
             a_d_r = K_c_r * len(R) * (1 - np.exp(-delta * D))
             a_d_y = K_c_y * len(Y) * (1 - np.exp(-delta * D))
             a_d_g = K_c_g * len(G) * (1 - np.exp(-delta * D))
-            a = [a_r, a_d_r, a_d_y, a_d_g]
-            a0 = sum(a)
-            Tau = np.random.exponential(scale=(1 / a0))
+            a0 = a_r + a_d_r + a_d_y + a_d_g
 
+            Tau = np.random.exponential(scale=(1 / a0)) if 0 < a0 else np.Inf
             theta1 = R[np.argmin(R)] if 0 < len(R) else np.Inf
             theta2 = Y[np.argmin(Y)] if 0 < len(Y) else np.Inf
             theta3 = G[np.argmin(G)] if 0 < len(G) else np.Inf
@@ -59,16 +59,7 @@ def logdelay(treatment_freq=10, drug_0=1, k_c=(0.25, 0, 0), delta=0.8):
             # Itt össze kell hasonlítani Tau-t a teták minimumával (azaz min(theta1, theta2, theta3)al)
             if Tau < min(theta1, theta2, theta3):
                 min_tau = Tau
-
-                # generate random number in U(0,1).
-                r_1 = np.random.uniform(0, 1)
-                # choose next reaction
-                mu = 0  # this will be the index of the next reaction
-                N = r_1 * a0 - a[mu]
-
-                while N > 0:
-                    mu = mu + 1
-                    N = N - a[mu]
+                mu = np.random.choice(4, p=[a_r / a0, a_d_r / a0, a_d_y / a0, a_d_g / a0])
 
                 if mu == 0:  # a_r nyert -> újabb sejt kerül a sejtciklusba
                     M -= 1
@@ -94,19 +85,19 @@ def logdelay(treatment_freq=10, drug_0=1, k_c=(0.25, 0, 0), delta=0.8):
                 min_tau = theta1
                 R = np.delete(R, np.argmin(R))
                 time_in_Y = np.random.gamma(k_y, cc_y)  # a sejtciklus Y-ben töltött hossza (jöhet eloszlásból)
-                Y = np.append(Y, [time_in_Y])
                 R -= min_tau
                 Y -= min_tau
                 G -= min_tau
+                Y = np.append(Y, [time_in_Y])
 
             elif np.min(np.array([theta1, theta2, theta3])) == theta2:  # Ha a legrövidebb idő Y-beli sejthez tartozik
                 min_tau = theta2
                 Y = np.delete(Y, np.argmin(Y))
                 time_in_G = np.random.gamma(k_g, cc_g)  # a sejtciklus G-ben töltött hossza (jöhet eloszlásból)
-                G = np.append(G, [time_in_G])
                 R -= min_tau
                 Y -= min_tau
                 G -= min_tau
+                G = np.append(G, [time_in_G])
 
             # elif np.min(np.array([theta1, theta2, theta3])) == theta3:  # Ha a legrövidebb idő G-beli sejthez tartozik
             else:
@@ -161,3 +152,4 @@ def logdelay(treatment_freq=10, drug_0=1, k_c=(0.25, 0, 0), delta=0.8):
         avg_M += np.array(d[4])[:m] / size
         avg_D += np.array(d[5])[:m] / size
     return [avg_t, avg_R, avg_Y, avg_G, avg_M, avg_D]
+

@@ -48,14 +48,15 @@ s_c8161_G = np.append(s_c8161_G, [c8161[2][-2:]])
 
 ###########################    Visualization    #################################
 
-plt.scatter(np.arange(0, len(c8161[0]) * 0.25, 0.25), c8161[0], alpha=0.2, c="red")
-plt.scatter(np.arange(0, len(c8161[1]) * 0.25, 0.25), c8161[1], alpha=0.2, c="orange")
-plt.scatter(np.arange(0, len(c8161[2]) * 0.25, 0.25), c8161[2], alpha=0.2, c="green")
+plt.scatter(np.arange(0, len(wm983c[0]) * 0.25, 0.25), wm983c[0], alpha=0.2, c="red")
+plt.scatter(np.arange(0, len(wm983c[1]) * 0.25, 0.25), wm983c[1], alpha=0.2, c="orange")
+plt.scatter(np.arange(0, len(wm983c[2]) * 0.25, 0.25), wm983c[2], alpha=0.2, c="green")
 
-plt.plot(np.arange(0, len(c8161[2]) * 0.25, 0.25), s_c8161_R, linewidth=2.0, alpha=1, c="red")
-plt.plot(np.arange(0, len(c8161[2]) * 0.25, 0.25), s_c8161_Y, linewidth=2.0, alpha=1, c="orange")
-plt.plot(np.arange(0, len(c8161[2]) * 0.25, 0.25), s_c8161_G, linewidth=2.0, alpha=1, c="green")
+plt.plot(np.arange(0, len(wm983c[2]) * 0.25, 0.25), s_wm983c_R, linewidth=2.0, alpha=1, c="red")
+plt.plot(np.arange(0, len(wm983c[2]) * 0.25, 0.25), s_wm983c_Y, linewidth=2.0, alpha=1, c="orange")
+plt.plot(np.arange(0, len(wm983c[2]) * 0.25, 0.25), s_wm983c_G, linewidth=2.0, alpha=1, c="green")
 plt.title('The R, Y, G curves after the smoothing process')
 plt.xlabel('Time')
 plt.ylabel('Number of cells')
+plt.savefig('smoothing.png', dpi=300)
 plt.show()

@@ -1,31 +1,40 @@
+# In this file, the initial times follow Gamma distributions, but during the simulation
+# the sampled times are always the same for each compartment, namely (k_i * cc_i) for compartment i.
+
 import numpy as np
+import matplotlib.pyplot as plt
 
 
-def cc_3_logdelay(params):
-    r_p, k_r, cc_r, k_y, cc_y, k_g, cc_g, k_r0, cc_r0, k_y0, cc_y0, k_g0, cc_g0 = params
+def logdelay():
+    r_p = 1 / 0.05
+    k_r = 10
+    k_y = 10
+    k_g = 10
+    cc_r = 1.028
+    cc_y = 0.387
+    cc_g = 1.285
     m0 = 0
-    r0 = 106
-    y0 = 209
+    r0 = 306
+    y0 = 109
     g0 = 76
-    repeat = 50
+    repeat = 20
     # cc_length = 10
-    K = 10000
+    K = 20000
     time_step = 0.25
     Data = []
     #############################################
 
     for i in range(repeat):
         M = m0
-
-        R = np.random.gamma(k_r0, cc_r0, r0)  # uniform(0, 2*10*1.028, r0)
-        Y = np.random.gamma(k_y0, cc_y0, y0)  # uniform(0, 2*10*0.387, y0)
-        G = np.random.gamma(k_g0, cc_g0, g0)  # uniform(0, 2*10*1.285, g0)
+        R = np.random.gamma(shape=9.223, scale=0.61, size=r0)
+        Y = np.random.gamma(shape=11.777, scale=0.479, size=y0)
+        G = np.random.gamma(shape=6.527, scale=0.99, size=g0)
 
         t = 0
         t_stat = [0]
         R_stat, Y_stat, G_stat, M_stat = [len(R)], [len(Y)], [len(G)], [M]
 
-        while t < 50 and np.any([0 < len(R), 0 < len(Y), 0 < len(G), M < K]):  # 47.75
+        while t < 125 and np.any([0 < len(R), 0 < len(Y), 0 < len(G), M < K]):  # 47.75
 
             tau1 = R[np.argmin(R)] if 0 < len(R) else np.Inf
             tau2 = Y[np.argmin(Y)] if 0 < len(Y) else np.Inf
@@ -39,7 +48,7 @@ def cc_3_logdelay(params):
 
             if min_tau == tau1:  # Ha a legrövidebb idő R-beli sejthez tartozik
                 R = np.delete(R, np.argmin(R))
-                time_in_Y = np.random.gamma(k_y, cc_y)  # a sejtciklus Y-ben töltött hossza (jöhet eloszlásból)
+                time_in_Y = k_y * cc_y  # a sejtciklus Y-ben töltött hossza (jöhet eloszlásból)
                 Y = np.append(Y, [time_in_Y])
                 R -= min_tau
                 Y -= min_tau
@@ -47,7 +56,7 @@ def cc_3_logdelay(params):
 
             elif min_tau == tau2:  # Ha a legrövidebb idő Y-beli sejthez tartozik
                 Y = np.delete(Y, np.argmin(Y))
-                time_in_G = np.random.gamma(k_g, cc_g)  # a sejtciklus G-ben töltött hossza (jöhet eloszlásból)
+                time_in_G = k_g * cc_g  # a sejtciklus G-ben töltött hossza (jöhet eloszlásból)
                 G = np.append(G, [time_in_G])
                 R -= min_tau
                 Y -= min_tau
@@ -65,7 +74,7 @@ def cc_3_logdelay(params):
                 R -= min_tau
                 Y -= min_tau
                 G -= min_tau
-                time_in_R = np.random.gamma(k_r, cc_r)  # a sejtciklus hossza
+                time_in_R = k_r * cc_r  # a sejtciklus hossza
                 R = np.append(R, [time_in_R])
 
             ######################## Statistics ################################
@@ -99,3 +108,28 @@ def cc_3_logdelay(params):
         avg_M += np.array(d[4])[:m] / size
 
     return [avg_t, avg_R, avg_Y, avg_G, avg_M]
+
+
+t, r, y, g, m = logdelay()
+
+fig, ax1 = plt.subplots(figsize=(8, 6))
+
+ax1.set_ylabel('Nr. of cells', color="black")
+ax1.plot(t, r, c="red", linewidth=1.5, label='Nr. of cells in R')
+ax1.plot(t, y, c="orange", linewidth=1.5, label='Nr. of cells in Y')
+ax1.plot(t, g, c="green", linewidth=1.5, label='Nr. of cells in G')
+ax1.plot(t, r + y + g, c='black', linewidth=2, label='Total nr. of cells')
+ax1.tick_params(axis='y', labelcolor="black")
+ax1.set_xlabel('Time')
+"""
+if any(d) != 0 or 0.0:
+    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-ax1
+    # ax2.set_ylim(bottom=0)
+    # ax2.margins(y = 0.05)
+    ax2.set_ylabel('Drug concentration, $\\frac{mg}{l}$', color="blue")
+    ax2.step(t, d, "blue", where='pre', alpha=0.4)
+    ax2.tick_params(axis='y', labelcolor="blue")
+"""
+fig.tight_layout()  # otherwise the right y-label is slightly clipped
+# plt.savefig('gamma_initial_simple_delay.png', dpi=300)
+plt.show()

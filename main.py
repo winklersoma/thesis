@@ -4,20 +4,24 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from logdelay import logdelay
 
-parameters_1 = [5, 7.5, 10]  # adagolások száma / sűrűsége
-parameters_2 = [0.75, 1, 1.25]  # D_0 kezdeti mennyiség
+# Define the parameters to run the model with
+parameters_1 = [24, 48]  # Treatment frequency
+parameters_2 = [15, 30]  # D_0 dosage size
+
+# Create variable names for subplots
 var_names = []
 for i in range(len(parameters_1)):
     for j in range(len(parameters_2)):
         var_names.append('sub' + str(i) + str(j))
 print(var_names)
-hm_data = np.zeros((len(parameters_1), len(parameters_2)))
 
+# Initialize output
+hm_data = np.zeros((len(parameters_1), len(parameters_2)))
 fig = plt.figure(figsize=(9, 9))
 
 k = 1
-for i in range(len(parameters_1)):  # sorokban treatment frequency
-    for j in range(len(parameters_2)):
+for i in range(len(parameters_1)):  # treatment frequency in rows
+    for j in range(len(parameters_2)):  # dosage size in cols
         t, r, y, g, m, d = logdelay(treatment_freq=parameters_1[i], drug_0=parameters_2[j])
         total_unhealty = r + y + g + m
         hm_data[i][j] = total_unhealty[-1] / total_unhealty[0]

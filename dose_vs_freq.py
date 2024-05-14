@@ -17,7 +17,7 @@ for i in range(len(parameters_1)):  # sorokban treatment frequency
 
 df = pd.DataFrame(hm_data, index=parameters_1, columns=parameters_2)
 hm = sns.heatmap(data=df, annot=True)
-plt.xlabel('Dosage size (in ng)')
+plt.xlabel('Dosage size (in mg)')
 plt.ylabel('Treatment frequency (hours between two treatments)')
 plt.title("Relative count of unhealty cells")
 plt.show()
