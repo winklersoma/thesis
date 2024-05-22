@@ -99,12 +99,3 @@ c8161 = np.array(
      [325, 181, 330], [339, 176, 337], [339, 188, 334], [328, 208, 336], [330, 201, 335], [315, 211, 337],
      [340, 200, 348], [344, 208, 346], [357, 184, 362], [371, 196, 347], [371, 188, 358], [375, 187, 376],
      [371, 195, 364], [376, 202, 344]]).T
-'''
-plt.scatter(np.arange(0, len(wm983c[2]) * 0.25, 0.25), wm983c[0], linewidth=0.5, alpha=0.4, c="red")
-plt.scatter(np.arange(0, len(wm983c[2]) * 0.25, 0.25), wm983c[1], linewidth=0.5, alpha=0.4, c="orange")
-plt.scatter(np.arange(0, len(wm983c[2]) * 0.25, 0.25), wm983c[2], linewidth=0.5, alpha=0.4, c="green")
-plt.title('The number of cells in the different cell cycle phases across time')
-plt.xlabel('Time')
-plt.ylabel('Number of cells')
-plt.show()
-'''
